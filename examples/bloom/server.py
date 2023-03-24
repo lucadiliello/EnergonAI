@@ -12,6 +12,11 @@ from transformers import AutoTokenizer, GenerationConfig
 from energonai import QueueFullError, launch_engine
 
 
+class SetTaskReq(BaseModel):
+    max_sequence_length: Optional[int] = Field(default=None, ge=1, le=1024)
+    max_batch_size: Optional[int] = Field(default=None, ge=1, le=1024)
+
+
 class GenerationTaskReq(BaseModel):
     prompt: str = Field(min_length=1)
     prefix: str = Field(default="")
@@ -37,7 +42,7 @@ app = FastAPI()
 @app.post('/generation')
 async def generate(data: GenerationTaskReq, request: Request):
     logger.info(
-        f'{request.client.host}:{request.client.port} - "{request.method} {request.url.path}" - {data}'
+        f'Generation {request.client.host}:{request.client.port} - "{request.method} {request.url.path}" - {data}'
     )
 
     # actual data that will be passed to the model batcher
@@ -56,6 +61,23 @@ async def generate(data: GenerationTaskReq, request: Request):
         raise HTTPException(status_code=406, detail=e.args[0])
 
     return {'text': outputs}
+
+
+@app.post('/set')
+async def set(data: SetTaskReq, request: Request):
+    logger.info(
+        f'Setting {request.client.host}:{request.client.port} - "{request.method} {request.url.path}" - {data}'
+    )
+
+    try:
+        if data.max_batch_size is not None:
+            batch_manager.max_batch_size = data.max_batch_size
+        if data.max_sequence_length is not None:
+            batch_manager.max_sequence_length = data.max_sequence_length
+    except Exception as e:
+        raise HTTPException(status_code=406, detail=e.args[0])
+
+    return 200
 
 
 @app.on_event("shutdown")
@@ -121,6 +143,11 @@ if __name__ == '__main__':
 
     logger = logging.getLogger(__name__)
     tokenizer = AutoTokenizer.from_pretrained(args.name, padding_side='left')
+    batch_manager = BatchManagerForGeneration(
+        max_batch_size=args.max_batch_size,
+        tokenizer=tokenizer,
+        max_sequence_length=args.max_sequence_length,
+    )
 
     engine = launch_engine(
         tp_world_size=args.tp,
@@ -129,11 +156,7 @@ if __name__ == '__main__':
         master_port=args.master_port,
         rpc_port=args.rpc_port,
         model_fn=model_fn,
-        batch_manager=BatchManagerForGeneration(
-            max_batch_size=args.max_batch_size,
-            tokenizer=tokenizer,
-            max_sequence_length=args.max_sequence_length,
-        ),
+        batch_manager=batch_manager,
         pipe_size=args.pipe_size,
         queue_size=args.queue_size,
         **model_kwargs,

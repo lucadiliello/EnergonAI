@@ -1,9 +1,13 @@
+import logging
 from typing import Any, Deque, Hashable, List, Tuple
 
 from encoding import batch_encode_with_prefix_and_postfix, decode_batch
 from transformers.tokenization_utils import PreTrainedTokenizerBase
 
 from energonai import BatchManager, SubmitEntry, TaskEntry
+
+
+logger = logging.getLogger(__name__)
 
 
 class BatchManagerForGeneration(BatchManager):
@@ -55,6 +59,8 @@ class BatchManagerForGeneration(BatchManager):
             max_sequence_length=self.max_sequence_length,
             tokenizer=self.tokenizer,
         )
+        logger.info(f"Aggregated sequence length: {inputs['input_ids'].shape[1]}")
+
         inputs['generation_config'] = generation_config
 
         # return data for model and additional info that will be used for decoding
