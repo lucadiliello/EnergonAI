@@ -17,8 +17,8 @@ class GenerationTaskReq(BaseModel):
     prefix: str = Field(default="")
     postfix: str = Field(default="")
 
-    max_new_tokens: int = Field(gt=0, le=256)
-    min_new_tokens: int = Field(gt=0, le=256)
+    max_new_tokens: int = Field(default=128, gt=0, le=256)
+    min_new_tokens: int = Field(default=16, gt=0, le=256)
 
     top_k: Optional[int] = Field(default=None, gt=0)
     top_p: Optional[float] = Field(default=None, gt=0.0, lt=1.0)
