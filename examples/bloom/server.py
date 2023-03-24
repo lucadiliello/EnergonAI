@@ -52,7 +52,6 @@ async def generate(data: GenerationTaskReq, request: Request):
         uid = id(data)
         engine.submit(uid, data)
         outputs = await engine.wait(uid)
-        outputs = tokenizer.batch_decode(outputs, skip_special_tokens=True)
     except QueueFullError as e:
         raise HTTPException(status_code=406, detail=e.args[0])
 

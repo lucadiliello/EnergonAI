@@ -1,6 +1,6 @@
 from typing import Any, Deque, Hashable, List, Tuple
 
-from encoding import batch_encode_with_prefix_and_postfix
+from encoding import batch_encode_with_prefix_and_postfix, decode_batch
 from transformers.tokenization_utils import PreTrainedTokenizerBase
 
 from energonai import BatchManager, SubmitEntry, TaskEntry
@@ -66,8 +66,10 @@ class BatchManagerForGeneration(BatchManager):
     def split_batch(
         self, task_entry: TaskEntry, num_return_sequences: int = None, input_length: int = None
     ) -> List[Tuple[Hashable, Any]]:
-        print("Task received", task_entry, num_return_sequences, input_length)
-        retval = []
-        for uid, output in zip(task_entry.uids, task_entry.batch):
-            retval.append((uid, output.reshape(1, -1)))
-        return retval
+        output_sentences = decode_batch(
+            task_entry.batch,
+            self.tokenizer,
+            num_return_sequences=num_return_sequences,
+            original_input_length=input_length,
+        )
+        return [(uid, output_sentence) for uid, output_sentence in zip(task_entry.uids, output_sentences)]
