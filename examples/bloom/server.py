@@ -1,26 +1,21 @@
 import argparse
 import logging
 from typing import Optional
+
 import torch
 import uvicorn
-
-from energonai import QueueFullError, launch_engine
+from batch import BatchManagerForGeneration
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field
+from transformers import AutoTokenizer, GenerationConfig
 
-from batch import BatchManagerForGeneration
-from transformers import AutoTokenizer
-
-TP_TARGET = [
-    'mlp',
-    'self_attention.dense',
-    'self_attention.query_key_value',
-    'word_embeddings.weight'
-]  # 'self_attention.attention_dropout',
+from energonai import QueueFullError, launch_engine
 
 
 class GenerationTaskReq(BaseModel):
     prompt: str = Field(min_length=1)
+    prefix: str = Field(default="")
+    postfix: str = Field(default="")
 
     max_new_tokens: int = Field(gt=0, le=256)
     min_new_tokens: int = Field(gt=0, le=256)
@@ -31,8 +26,8 @@ class GenerationTaskReq(BaseModel):
     length_penalty: Optional[float] = Field(default=1.0)
 
     do_sample: Optional[bool] = Field(default=False)
-    num_beams: Optional[int] = Field(default=1, gt=0, le=16)
-    num_return_sequences: Optional[int] = Field(default=1, le=16, ge=1)
+    num_beams: Optional[int] = Field(default=1, ge=1, le=16)
+    num_return_sequences: Optional[int] = Field(default=1, ge=1, le=16)
     num_beam_groups: Optional[int] = Field(default=1, ge=1, le=16)
 
 
@@ -45,19 +40,22 @@ async def generate(data: GenerationTaskReq, request: Request):
         f'{request.client.host}:{request.client.port} - "{request.method} {request.url.path}" - {data}'
     )
 
-    input_tokens = tokenizer.encode_plus(data.prompt, return_tensors="pt", padding=True)
-    generation_config = {}
-    for field, value in data.dict().items():
-        if field != "prompt":
-            generation_config[field] = value
-    generation_config
+    # actual data that will be passed to the model batcher
+    data = {
+        'prompt': data.prompt,
+        'prefix': data.prefix,
+        'postfix': data.postfix,
+        'generation_config': GenerationConfig(**data.dict(), _from_model_config=True),  # creating generation config
+    }
+
     try:
         uid = id(data)
-        engine.submit(uid, input_tokens)
+        engine.submit(uid, data)
         outputs = await engine.wait(uid)
         outputs = tokenizer.batch_decode(outputs, skip_special_tokens=True)
     except QueueFullError as e:
         raise HTTPException(status_code=406, detail=e.args[0])
+
     return {'text': outputs}
 
 
@@ -81,10 +79,6 @@ class WrapCallModule(torch.nn.Module):
         self.model = model
 
     def forward(self, **generate_kwargs):
-        input_ids_batch = generate_kwargs["input_ids"]
-        attention_mask_batch = generate_kwargs["attention_mask"]
-        generate_kwargs["input_ids"] = torch.cat(input_ids_batch, 0)
-        generate_kwargs["attention_mask"] = torch.cat(attention_mask_batch, 0)
         return self.model.generate(**generate_kwargs)
 
 
@@ -96,8 +90,8 @@ def model_fn(**model_kwargs):
     from_pretrain = model_kwargs['random_init'] is False
     data_path = model_kwargs['name']
     size = model_kwargs['size']
-
     model = run(tp=tp, from_pretrain=from_pretrain, data_path=data_path, use_int8=use_int8, size=size)
+
     return WrapCallModule(model)
 
 
@@ -108,7 +102,7 @@ if __name__ == '__main__':
     parser.add_argument('--master_host', default='localhost')
     parser.add_argument('--master_port', type=int, default=19991)
     parser.add_argument('--rpc_port', type=int, default=19981)
-    parser.add_argument('--max_batch_size', type=int, default=1)
+    parser.add_argument('--max_batch_size', type=int, default=8)
     parser.add_argument('--pipe_size', type=int, default=1)
     parser.add_argument('--queue_size', type=int, default=10)
     parser.add_argument('--http_host', default='0.0.0.0')
@@ -127,7 +121,7 @@ if __name__ == '__main__':
     }
 
     logger = logging.getLogger(__name__)
-    tokenizer = AutoTokenizer.from_pretrained(args.name)
+    tokenizer = AutoTokenizer.from_pretrained(args.name, padding_side='left')
 
     engine = launch_engine(
         tp_world_size=args.tp,
@@ -138,7 +132,8 @@ if __name__ == '__main__':
         model_fn=model_fn,
         batch_manager=BatchManagerForGeneration(
             max_batch_size=args.max_batch_size,
-            pad_token_id=tokenizer.pad_token_id,
+            tokenizer=tokenizer,
+            max_sequence_length=args.max_sequence_length,
         ),
         pipe_size=args.pipe_size,
         queue_size=args.queue_size,

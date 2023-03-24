@@ -1,8 +1,10 @@
-from energonai.testing import BoringModel, get_correct_output
-from energonai import launch_engine
-from colossalai.utils import free_port
-import torch
 import asyncio
+
+import torch
+from colossalai.utils import free_port
+
+from energonai import launch_engine
+from energonai.testing import BoringModel, get_correct_output
 
 
 def run_boring_model(tp_world_size: int, pp_world_size: int):

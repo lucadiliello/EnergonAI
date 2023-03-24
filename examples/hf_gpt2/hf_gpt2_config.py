@@ -1,6 +1,7 @@
 from hf_gpt2 import hf_gpt2
 from hf_gpt2_server import launch_engine
 
+
 # for engine
 model_class = hf_gpt2
 model_type = "gpt"

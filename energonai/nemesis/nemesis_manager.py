@@ -6,8 +6,10 @@ Mainly used for peer memory offloading
 """
 
 import sys
-import torch
+
 import pynvml
+import torch
+
 
 NUM_EXPAND = 1024 ** 3
 

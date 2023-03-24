@@ -8,15 +8,15 @@ import colossalai.nn as col_nn
 import torch
 import torch.multiprocessing as mp
 import torch.nn as nn
-
-from example.gpt.gpt import gpt2_small
-from energonai.context.parallel_mode import ParallelMode
-from energonai.engine import InferenceEngine
-from example.bert.bert import bert_small
-from energonai.core import global_context as gpc
-from energonai.initialize import launch
 from colossalai.logging import disable_existing_loggers
 from colossalai.utils import free_port, is_using_pp
+from example.bert.bert import bert_small
+from example.gpt.gpt import gpt2_small
+
+from energonai.context.parallel_mode import ParallelMode
+from energonai.core import global_context as gpc
+from energonai.engine import InferenceEngine
+from energonai.initialize import launch
 from energonai.utils.checkpointing import gather_pipeline_parallel_state_dict, load_checkpoint, save_checkpoint
 
 

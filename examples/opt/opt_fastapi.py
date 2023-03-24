@@ -4,14 +4,14 @@ import random
 from typing import Optional
 
 import uvicorn
-from energonai import QueueFullError, launch_engine
-from energonai.model import opt_6B, opt_30B, opt_125M, opt_175B
+from batch import BatchManagerForGeneration
+from cache import ListCache, MissCacheError
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field
 from transformers import GPT2Tokenizer
 
-from batch import BatchManagerForGeneration
-from cache import ListCache, MissCacheError
+from energonai import QueueFullError, launch_engine
+from energonai.model import opt_6B, opt_30B, opt_125M, opt_175B
 
 
 class GenerationTaskReq(BaseModel):

@@ -3,18 +3,18 @@
 
 import pprint
 from functools import partial
-from colossalai.logging import get_dist_logger
 
 import colossalai.nn as col_nn
 import pytest
 import torch
 import torch.multiprocessing as mp
 import torch.nn as nn
+from colossalai.logging import disable_existing_loggers, get_dist_logger
+from colossalai.utils import free_port, is_using_pp
+
 from energonai.context.parallel_mode import ParallelMode
 from energonai.core import global_context as gpc
 from energonai.initialize import launch
-from colossalai.logging import disable_existing_loggers
-from colossalai.utils import free_port, is_using_pp
 from energonai.utils.checkpointing import gather_pipeline_parallel_state_dict, load_checkpoint, save_checkpoint
 
 

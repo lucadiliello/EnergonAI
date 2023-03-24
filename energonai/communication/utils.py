@@ -1,8 +1,7 @@
 import torch
 import torch.distributed as dist
-
-from colossalai.core import global_context as gpc
 from colossalai.context import ParallelMode
+from colossalai.core import global_context as gpc
 from colossalai.utils import get_current_device
 
 

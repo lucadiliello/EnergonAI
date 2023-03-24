@@ -1,17 +1,19 @@
 import math
+import os
 from typing import Callable
 
-import os
 import torch
-from torch import nn as nn, Tensor, dtype
-
 from colossalai.context import ParallelMode
 from colossalai.core import global_context as gpc
 from colossalai.logging import get_dist_logger
-from colossalai.nn.layer.utils import divide, ACT2FN
-from colossalai.nn import Linear1D_Col, Linear1D_Row, LayerNorm1D, VocabParallelEmbedding1D
-from energonai.kernel import transpose_pad, transpose_depad, depad
+from colossalai.nn import LayerNorm1D, Linear1D_Col, Linear1D_Row, VocabParallelEmbedding1D
+from colossalai.nn.layer.utils import ACT2FN, divide
 from colossalai.utils import get_current_device, is_using_pp
+from torch import Tensor, dtype
+from torch import nn as nn
+
+from energonai.kernel import depad, transpose_depad, transpose_pad
+
 
 __all__ = [
     'BertEmbedding1D'

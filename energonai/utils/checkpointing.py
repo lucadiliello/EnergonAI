@@ -1,13 +1,12 @@
 from collections import OrderedDict
+from typing import Callable, Optional
 
 import torch
 import torch.distributed as dist
-
-from colossalai.utils import is_using_pp
 from colossalai.context import ParallelMode
 from colossalai.core import global_context as gpc
-from typing import Optional, Callable
-from colossalai.utils.checkpointing import partition_pipeline_parallel_state_dict, broadcast_model
+from colossalai.utils import is_using_pp
+from colossalai.utils.checkpointing import broadcast_model, partition_pipeline_parallel_state_dict
 
 
 __all__ = [

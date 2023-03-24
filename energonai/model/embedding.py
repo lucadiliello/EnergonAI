@@ -1,9 +1,9 @@
 import torch
-from torch import nn as nn
-from torch import dtype
 from colossalai.nn import VocabParallelEmbedding1D
-from torch.nn import Embedding
 from colossalai.utils import get_current_device
+from torch import dtype
+from torch import nn as nn
+from torch.nn import Embedding
 
 
 class Embedding1D(nn.Module):

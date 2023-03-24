@@ -1,5 +1,7 @@
-import torch
 import importlib
+
+import torch
+
 
 try:
     energonai_scale_mask = importlib.import_module("energonai_scale_mask")

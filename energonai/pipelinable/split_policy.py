@@ -1,5 +1,7 @@
 import functools
+
 from torch.fx.node import Node
+
 from energonai.context import MEATCONFIG
 
 
@@ -32,8 +34,10 @@ def module_equal_partition(partition_nums):
 
 
 
-from colossalai.core import global_context as gpc
 from colossalai.context import ParallelMode
+from colossalai.core import global_context as gpc
+
+
 partition_counter_2 = -1 # for embedding layer
 # partition_nums: nums of each submodule
 def _transformer_partition(node: Node, depth):

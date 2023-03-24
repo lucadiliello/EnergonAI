@@ -1,5 +1,6 @@
-from gpt import gpt2_small, gpt2_medium, gpt2_large, gpt2_xl, gpt2_8B, gpt3
+from gpt import gpt2_8B, gpt2_large, gpt2_medium, gpt2_small, gpt2_xl, gpt3
 from gpt_batch_server import launch_engine
+
 
 # for engine
 model_class = gpt2_8B

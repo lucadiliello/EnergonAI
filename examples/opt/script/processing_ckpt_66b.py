@@ -1,6 +1,8 @@
 import os
-import torch
 from multiprocessing import Pool
+
+import torch
+
 
 # download pytorch model ckpt in https://huggingface.co/facebook/opt-66b/tree/main
 # you can use whether wget or git lfs

@@ -1,5 +1,6 @@
-from typing import Any, Hashable, Tuple, Deque, Iterable
 from dataclasses import dataclass
+from typing import Any, Deque, Hashable, Iterable, Tuple
+
 from .task import TaskEntry
 
 

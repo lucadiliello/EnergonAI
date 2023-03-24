@@ -1,5 +1,7 @@
+from typing import Any, Deque, Hashable, List, Tuple
+
 import torch
-from typing import List, Deque, Tuple, Hashable, Any
+
 from energonai import BatchManager, SubmitEntry, TaskEntry
 
 

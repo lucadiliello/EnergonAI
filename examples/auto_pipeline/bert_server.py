@@ -1,9 +1,12 @@
 import os
+
 import torch
 import uvicorn
 from fastapi import FastAPI
-from energonai.engine import InferenceEngine
+
 from energonai.context import MEATCONFIG
+from energonai.engine import InferenceEngine
+
 
 app = FastAPI() # 创建 api 对象
 

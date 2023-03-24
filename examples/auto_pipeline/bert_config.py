@@ -1,6 +1,6 @@
-from bert import bert_small, bert_large, bert_xl, bert_8B, bert_175B
+from bert import BertEmbedding1D, BertTransformerLayer1D, bert_8B, bert_175B, bert_large, bert_small, bert_xl
 from bert_server import launch_engine
-from bert import BertEmbedding1D, BertTransformerLayer1D
+
 
 model_class = bert_8B
 model_type = "bert"

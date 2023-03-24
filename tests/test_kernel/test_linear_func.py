@@ -1,6 +1,8 @@
-from energonai.kernel import linear, find_algo
-import torch
 import time
+
+import torch
+
+from energonai.kernel import find_algo, linear
 
 
 @torch.no_grad()

@@ -4,6 +4,7 @@ import time
 
 import torch
 
+
 _GLOBAL_TIMERS = None
 
 

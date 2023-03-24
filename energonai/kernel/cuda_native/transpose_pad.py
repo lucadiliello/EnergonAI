@@ -1,5 +1,7 @@
-import torch
 import importlib
+
+import torch
+
 
 try:
     energonai_transpose_pad = importlib.import_module("energonai_transpose_pad")

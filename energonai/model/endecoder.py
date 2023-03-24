@@ -1,11 +1,11 @@
 from typing import Callable
-import torch
-from torch import dtype
-from torch import nn
-from colossalai.nn import LayerNorm1D
 
-from .mlp import MLP1D
+import torch
+from colossalai.nn import LayerNorm1D
+from torch import dtype, nn
+
 from .attention import MultiHeadAttention1D
+from .mlp import MLP1D
 
 
 class Block1D(nn.Module):

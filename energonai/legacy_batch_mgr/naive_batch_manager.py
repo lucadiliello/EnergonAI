@@ -4,13 +4,15 @@ Class Batch Manager.
 a naive version that is used for cases in which padding is not needed.
 ------------------------------------------
 """
-import time
-import redis
-from energonai.context import MEATCONFIG
-import threading
-from readerwriterlock import rwlock
 import logging
+import threading
+import time
 from concurrent.futures import ThreadPoolExecutor
+
+import redis
+from readerwriterlock import rwlock
+
+from energonai.context import MEATCONFIG
 
 
 class single_request:

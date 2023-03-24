@@ -1,8 +1,9 @@
 
 from typing import Callable, Optional
+
 import torch
-from torch import dtype, nn
 from colossalai.nn import Linear1D_Col, Linear1D_Row
+from torch import dtype, nn
 
 
 class MLP1D(nn.Module):

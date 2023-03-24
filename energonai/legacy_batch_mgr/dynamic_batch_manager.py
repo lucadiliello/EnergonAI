@@ -4,19 +4,22 @@ Class Batch Manager and the function for generating cached cost.
 Part of the algorithm comes from Turbo Transformer.
 ------------------------------------------
 """
-import time
-from collections import deque
-import numpy as np
-import scipy.stats as stats
-import redis
+import logging
 import math
 import os
-from tqdm import trange
 import threading
-from readerwriterlock import rwlock
-import logging
+import time
+from collections import deque
 from concurrent.futures import ThreadPoolExecutor
+
+import numpy as np
+import redis
+import scipy.stats as stats
+from readerwriterlock import rwlock
+from tqdm import trange
+
 from energonai.context import MEATCONFIG
+
 
 class gamma_dist:
     """

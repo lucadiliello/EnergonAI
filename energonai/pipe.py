@@ -1,9 +1,10 @@
-import torch.distributed.rpc as trpc
 import time
-from queue import Queue, Empty
-from typing import Dict
+from queue import Empty, Queue
 from threading import Lock
-from typing import Any
+from typing import Any, Dict
+
+import torch.distributed.rpc as trpc
+
 from .utils import use_lock
 
 

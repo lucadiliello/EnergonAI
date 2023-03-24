@@ -1,7 +1,9 @@
-from torch.fx.passes.split_module import split_module
-from .split_policy import module_equal_partition, naive_equal_partition, transformer_partition
-from .energon_tracer import EnergonTracer
 import torch.fx
+from torch.fx.passes.split_module import split_module
+
+from .energon_tracer import EnergonTracer
+from .split_policy import module_equal_partition, naive_equal_partition, transformer_partition
+
 
 def filter_graph(traced: torch.fx.GraphModule, filter_type: str):
     len = 0

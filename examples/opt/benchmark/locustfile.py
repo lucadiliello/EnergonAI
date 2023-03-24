@@ -1,5 +1,6 @@
-from locust import HttpUser, task
 from json import JSONDecodeError
+
+from locust import HttpUser, task
 
 
 class GenerationUser(HttpUser):

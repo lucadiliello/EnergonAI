@@ -73,15 +73,13 @@ class AsyncEngine:
     def _submit_loop(self) -> None:
         while self.running:
             if len(self.submit_queue) > 0:
-                print("Submit queue", self.submit_queue)
                 task_entry, batch_info = self.batch_manager.make_batch(self.submit_queue)
-                print("Task entry: ", task_entry, batch_info)
                 self.batch_info[task_entry.uids] = batch_info
                 self.timer_info[task_entry.uids] = (len(task_entry.uids), time.time())
                 for pipe in self.submit_pipes:
                     pipe.send(task_entry)
             else:
-                time.sleep(0.01)
+                time.sleep(0.1)
 
     def _completion_loop(self) -> None:
         received_data: Dict[int, Any] = {}
@@ -102,7 +100,7 @@ class AsyncEngine:
                 batch_size, start_time = self.timer_info.pop(task_entries[0].uids)
                 self.logger.info(f'batch size: {batch_size}, time: {time.time() -start_time:.3f}')
             else:
-                time.sleep(0.01)
+                time.sleep(0.1)
 
     def _start(self) -> None:
         self.running = True

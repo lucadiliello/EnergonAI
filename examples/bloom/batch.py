@@ -1,56 +1,73 @@
-import torch
-from typing import List, Deque, Tuple, Hashable, Any
+from typing import Any, Deque, Hashable, List, Tuple
+
+from encoding import batch_encode_with_prefix_and_postfix
+from transformers.tokenization_utils import PreTrainedTokenizerBase
+
 from energonai import BatchManager, SubmitEntry, TaskEntry
 
 
 class BatchManagerForGeneration(BatchManager):
-    def __init__(self, max_batch_size: int = 1, pad_token_id: int = 0) -> None:
+
+    def __init__(
+        self,
+        max_batch_size: int = 1,
+        tokenizer: PreTrainedTokenizerBase = None,
+        max_sequence_length: int = 512,
+    ):
         super().__init__()
+        self.tokenizer = tokenizer
+        self.max_sequence_length = max_sequence_length
         self.max_batch_size = max_batch_size
-        self.pad_token_id = pad_token_id
 
-    def _left_padding(self, batch_inputs):
-        max_len = max(len(inputs['input_ids']) for inputs in batch_inputs)
-        outputs = {'input_ids': [], 'attention_mask': []}
-        for inputs in batch_inputs:
-            input_ids, attention_mask = inputs['input_ids'], inputs['attention_mask']
-            padding_len = max_len - len(input_ids)
-            padding = torch.tensor([self.pad_token_id] * padding_len, device=input_ids.device, dtype=torch.int)
-            input_ids = torch.cat((padding, input_ids), 0)
+    def make_batch(self, queue: Deque[SubmitEntry]) -> Tuple[TaskEntry, dict]:
+        # generation config will be the same for all elements in batch
+        generation_config = queue[0].data['generation_config']
+        prefix = queue[0].data['prefix']
+        postfix = queue[0].data['postfix']
 
-            padding = torch.tensor([0] * padding_len, device=attention_mask.device, dtype=torch.int)
-            attention_mask = torch.cat((padding, attention_mask), 0)
-            outputs['input_ids'].append(input_ids)
-            outputs['attention_mask'].append(attention_mask)
-        return outputs, max_len
+        # initialize uids and batch lists
+        uids = []
+        batch = []
 
-    @staticmethod
-    def _make_batch_key(entry: SubmitEntry) -> tuple:
-        return ()
+        # increase the batch size until:
+        # 1) there are elements in the queue
+        # 2) we are not exceeding max batch size
+        # 3) generation configs are equal
+        # 4) prefix or postfix are equal
+        while (len(queue) > 0) and (len(batch) < self.max_batch_size) and (
+            queue[0].data['generation_config'] == generation_config
+        ) and (
+            queue[0].data['prefix'] == prefix
+        ) and (
+            queue[0].data['postfix'] == postfix
+        ):
+            # get new element from queue and remove generation config
+            e = queue.popleft()
 
-    def make_batch(self, q: Deque[SubmitEntry]) -> Tuple[TaskEntry, dict]:
-        entry = q.popleft()
-        uids = [entry.uid]
-        batch = [entry.data]
-        while len(batch) < self.max_batch_size:
-            if len(q) == 0:
-                break
-            if self._make_batch_key(entry) != self._make_batch_key(q[0]):
-                break
-            if q[0].data['max_new_tokens'] > entry.data['max_new_tokens']:
-                break
-            e = q.popleft()
-            batch.append(e.data)
+            # add prompts to batch
+            batch.append(e.data['prompt'])
             uids.append(e.uid)
-        inputs, max_len = self._left_padding(batch)
-        trunc_lens = []
-        for data in batch:
-            trunc_lens.append(max_len + data['max_new_tokens'])
-        inputs['max_new_tokens'] = max_len + entry.data['max_new_tokens']
-        return TaskEntry(tuple(uids), inputs), {'trunc_lens': trunc_lens}
 
-    def split_batch(self, task_entry: TaskEntry, trunc_lens: List[int] = []) -> List[Tuple[Hashable, Any]]:
+        inputs = batch_encode_with_prefix_and_postfix(
+            batch,
+            prefix=prefix,
+            postfix=postfix,
+            max_sequence_length=self.max_sequence_length,
+            tokenizer=self.tokenizer,
+        )
+        inputs['generation_config'] = generation_config
+
+        # return data for model and additional info that will be used for decoding
+        return TaskEntry(tuple(uids), inputs), {
+            'num_return_sequences': generation_config.num_return_sequences,
+            'input_length': inputs['input_ids'].shape[1],
+        }
+
+    def split_batch(
+        self, task_entry: TaskEntry, num_return_sequences: int = None, input_length: int = None
+    ) -> List[Tuple[Hashable, Any]]:
+        print("Task received", task_entry, num_return_sequences, input_length)
         retval = []
-        for uid, output, trunc_len in zip(task_entry.uids, task_entry.batch, trunc_lens):
-            retval.append((uid, (output[:trunc_len]).reshape(1, -1)))
+        for uid, output in zip(task_entry.uids, task_entry.batch):
+            retval.append((uid, output.reshape(1, -1)))
         return retval

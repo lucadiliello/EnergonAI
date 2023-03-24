@@ -1,6 +1,13 @@
-from energonai.kernel import ft_build_padding_offsets, ft_remove_padding, ft_rebuild_padding, ft_transpose_remove_padding, ft_transpose_rebuild_padding
-import torch
 import pytest
+import torch
+
+from energonai.kernel import (
+    ft_build_padding_offsets,
+    ft_rebuild_padding,
+    ft_remove_padding,
+    ft_transpose_rebuild_padding,
+    ft_transpose_remove_padding,
+)
 
 
 seq_lens =  torch.tensor([24,127,31,65,24,127,31,65], dtype=torch.int).cuda()

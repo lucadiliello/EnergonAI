@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Hashable, Tuple, Any
+from typing import Any, Hashable, Tuple
 
 
 @dataclass

@@ -1,20 +1,28 @@
 import math
-from typing import Callable
 import os
+import random
+from typing import Callable
 
 import torch
-import random
-from torch import nn as nn, Tensor, dtype
-
 from colossalai.context import ParallelMode
 from colossalai.core import global_context as gpc
 from colossalai.logging import get_dist_logger
-from colossalai.nn.layer.utils import divide, ACT2FN
-from colossalai.nn import Linear1D_Col, Linear1D_Row, Classifier1D, LayerNorm1D, VocabParallelEmbedding1D
+from colossalai.nn import Classifier1D, LayerNorm1D, Linear1D_Col, Linear1D_Row, VocabParallelEmbedding1D
+from colossalai.nn.layer.utils import ACT2FN, divide
 from colossalai.utils import get_current_device, is_using_pp
+from torch import Tensor, dtype
+from torch import nn as nn
+
+from energonai.kernel import (
+    depad,
+    ft_build_padding_offsets,
+    ft_rebuild_padding,
+    ft_remove_padding,
+    transpose_depad,
+    transpose_pad,
+)
 from energonai.utils.checkpointing import load_checkpoint
-from energonai.kernel import transpose_pad, transpose_depad, depad
-from energonai.kernel import ft_build_padding_offsets, ft_remove_padding, ft_rebuild_padding
+
 
 __all__ = [
     'GPTEmbedding1D'
@@ -77,8 +85,7 @@ class GPTSelfAttention1D(nn.Module):
 
         if fuse_scale_mask_softmax:
             from colossalai.kernel import FusedScaleMaskSoftmax
-            from colossalai.kernel.cuda_native.scaled_softmax import \
-                AttnMaskType
+            from colossalai.kernel.cuda_native.scaled_softmax import AttnMaskType
             self.softmax = FusedScaleMaskSoftmax(input_in_fp16=True,
                                                  input_in_bf16=False,
                                                  attn_mask_type=AttnMaskType.causal,

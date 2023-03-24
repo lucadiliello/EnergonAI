@@ -1,6 +1,6 @@
+import pytest
 from colossalai.testing import rerun_if_address_is_in_use
 from test_engine.boring_model_utils import run_boring_model
-import pytest
 
 
 @pytest.mark.dist

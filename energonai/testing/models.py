@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
-from colossalai.nn import Linear1D_Col, Linear1D_Row
-from colossalai.core import global_context as gpc
 from colossalai.context import ParallelMode
+from colossalai.core import global_context as gpc
+from colossalai.nn import Linear1D_Col, Linear1D_Row
 from colossalai.utils import is_using_pp
 
 

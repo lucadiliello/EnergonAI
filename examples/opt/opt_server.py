@@ -1,18 +1,20 @@
-import logging
 import argparse
+import logging
 import random
-from torch import Tensor
-from pydantic import BaseModel, Field
 from typing import Optional
-from energonai.model import opt_125M, opt_30B, opt_175B, opt_6B
-from transformers import GPT2Tokenizer
-from energonai import launch_engine, QueueFullError
+
+from batch import BatchManagerForGeneration
+from cache import ListCache, MissCacheError
+from pydantic import BaseModel, Field
 from sanic import Sanic
 from sanic.request import Request
 from sanic.response import json
-from sanic_ext import validate, openapi
-from batch import BatchManagerForGeneration
-from cache import ListCache, MissCacheError
+from sanic_ext import openapi, validate
+from torch import Tensor
+from transformers import GPT2Tokenizer
+
+from energonai import QueueFullError, launch_engine
+from energonai.model import opt_6B, opt_30B, opt_125M, opt_175B
 
 
 class GenerationTaskReq(BaseModel):

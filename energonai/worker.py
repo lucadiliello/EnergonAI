@@ -88,7 +88,6 @@ class Worker:
         trpc.shutdown()
 
     def _forward(self, inputs: Any) -> Any:
-        print(f"Inputs: {inputs}")
         if isinstance(inputs, (tuple, list)):
             outputs = self.model(*inputs)
         elif isinstance(inputs, dict):

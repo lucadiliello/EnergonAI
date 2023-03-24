@@ -19,14 +19,16 @@ from .downstream import LMHead1D
 from .embedding import Embedding1D
 from .endecoder import Block1D
 
+
 try:
     from transformers.generation_logits_process import (
-        LogitsProcessorList, TemperatureLogitsWarper, TopKLogitsWarper,
-        TopPLogitsWarper)
+        LogitsProcessorList,
+        TemperatureLogitsWarper,
+        TopKLogitsWarper,
+        TopPLogitsWarper,
+    )
 except ImportError:
-    from transformers.generation import (LogitsProcessorList,
-                                         TemperatureLogitsWarper,
-                                         TopKLogitsWarper, TopPLogitsWarper)
+    from transformers.generation import LogitsProcessorList, TemperatureLogitsWarper, TopKLogitsWarper, TopPLogitsWarper
 
 
 def gelu_impl(x):

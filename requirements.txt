@@ -12,11 +12,13 @@ requests
 click
 transformers
 readerwriterlock
---extra-index-url https://download.pytorch.org/whl/cu113
+--extra-index-url https://download.pytorch.org/whl/cu117
 torch
 torchvision
 torchaudio 
 colossalai
 omegaconf
 prometheus-fastapi-instrumentator
-
+accelerate
+bitsandbytes
+hiq

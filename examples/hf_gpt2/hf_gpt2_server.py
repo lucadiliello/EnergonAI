@@ -1,12 +1,13 @@
 import os
+
 import torch
-import uvicorn
-from fastapi import FastAPI
-from fastapi import Response
 import torch.distributed.rpc as rpc
+import uvicorn
+from fastapi import FastAPI, Response
+from transformers import GPT2Tokenizer
+
 from energonai.engine import InferenceEngine
 
-from transformers import GPT2Tokenizer
 
 app = FastAPI() # 创建 api 对象
 

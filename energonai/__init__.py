@@ -1,5 +1,5 @@
 from .batch_mgr import BatchManager
-from .engine import launch_engine, SubmitEntry, QueueFullError
+from .engine import QueueFullError, SubmitEntry, launch_engine
 from .task import TaskEntry
 
 

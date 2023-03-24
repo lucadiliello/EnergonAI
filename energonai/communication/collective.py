@@ -3,12 +3,11 @@
 
 import torch
 import torch.distributed as dist
-from torch.distributed import ReduceOp
-from torch import Tensor
-
-from colossalai.core import global_context as gpc
 from colossalai.context import ParallelMode
+from colossalai.core import global_context as gpc
 from colossalai.utils import get_current_device
+from torch import Tensor
+from torch.distributed import ReduceOp
 
 
 def all_gather(tensor: Tensor, dim: int, parallel_mode: ParallelMode, async_op: bool = False) -> Tensor:

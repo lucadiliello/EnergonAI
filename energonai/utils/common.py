@@ -1,9 +1,11 @@
-import torch
 import functools
 import signal
-from typing import Optional, Dict, Union, Callable, Any
-from threading import Lock
 from contextlib import contextmanager
+from threading import Lock
+from typing import Any, Callable, Dict, Optional, Union
+
+import torch
+
 
 DeviceType = Union[int, str, torch.device]
 

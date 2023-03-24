@@ -1,5 +1,5 @@
-from torch import dtype, nn
 from colossalai.nn import Classifier1D, VocabParallelClassifier1D
+from torch import dtype, nn
 
 
 class LMHead1D(nn.Module):

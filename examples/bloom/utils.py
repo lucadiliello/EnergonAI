@@ -1,14 +1,16 @@
-import torch
-from torch import nn, Tensor
-import torch.distributed as dist
-import bitsandbytes as bnb
-import torch.nn.functional as F
-from typing import Optional, List
-import time
-import datetime
-from torch.distributed.distributed_c10d import ReduceOp
 import copy
-from transformers import BloomTokenizerFast, BloomForCausalLM, BloomConfig, AutoModelForCausalLM
+import datetime
+import time
+from typing import List, Optional
+
+import bitsandbytes as bnb
+import torch
+import torch.distributed as dist
+import torch.nn.functional as F
+from torch import Tensor, nn
+from torch.distributed.distributed_c10d import ReduceOp
+from transformers import AutoModelForCausalLM, BloomConfig, BloomForCausalLM, BloomTokenizerFast
+
 
 def getModelSize(model):
     param_size = 0
@@ -387,6 +389,8 @@ def get_tp_model_list(model : torch.nn.Module,
             
 
 from contextlib import contextmanager
+
+
 @contextmanager
 def init_empty_weights():
     old_register_parameter = nn.Module.register_parameter

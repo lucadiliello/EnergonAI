@@ -1,6 +1,8 @@
-import torch
-import time
 import importlib
+import time
+
+import torch
+
 
 try:
     energonai_linear = importlib.import_module("energonai_linear_func")

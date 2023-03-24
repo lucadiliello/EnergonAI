@@ -1,9 +1,8 @@
 import torch
-from torch import nn, dtype
-
-from colossalai.nn.layer.utils import divide
 from colossalai.nn import Linear1D_Col, Linear1D_Row
+from colossalai.nn.layer.utils import divide
 from colossalai.utils import get_current_device
+from torch import dtype, nn
 
 
 class MultiHeadAttention1D(nn.Module):
