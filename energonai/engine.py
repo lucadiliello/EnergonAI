@@ -73,7 +73,9 @@ class AsyncEngine:
     def _submit_loop(self) -> None:
         while self.running:
             if len(self.submit_queue) > 0:
+                print("Submit queue", self.submit_queue)
                 task_entry, batch_info = self.batch_manager.make_batch(self.submit_queue)
+                print("Task entry: ", task_entry, batch_info)
                 self.batch_info[task_entry.uids] = batch_info
                 self.timer_info[task_entry.uids] = (len(task_entry.uids), time.time())
                 for pipe in self.submit_pipes:

@@ -26,7 +26,6 @@ class BatchManagerForGeneration(BatchManager):
 
     @staticmethod
     def _make_batch_key(entry: SubmitEntry) -> tuple:
-        data = entry.data
         return ()
 
     def make_batch(self, q: Deque[SubmitEntry]) -> Tuple[TaskEntry, dict]:
