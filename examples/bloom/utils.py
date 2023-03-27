@@ -9,7 +9,7 @@ import torch.distributed as dist
 import torch.nn.functional as F
 from torch import Tensor, nn
 from torch.distributed.distributed_c10d import ReduceOp
-from transformers import AutoModelForCausalLM, BloomConfig, BloomForCausalLM, BloomTokenizerFast
+from transformers import AutoModelForCausalLM, BloomConfig, BloomForCausalLM
 
 
 def getModelSize(model):
@@ -28,6 +28,7 @@ def getModelSize(model):
     return (param_size, param_sum, buffer_size, buffer_sum, all_size)
 
 class Linear8bitTP(nn.Linear):
+
     def __init__(
         self,
         input_features,
@@ -56,9 +57,8 @@ class Linear8bitTP(nn.Linear):
         self.world_size = dist.get_world_size()
         self.register_parameter("SCB", nn.Parameter(torch.empty(0), requires_grad=False))
         self.weight = weight_data
-        
 
-    def quant(self):  
+    def quant(self):
         weight = self.weight.data.contiguous().half().to(self.rank)
         CB, _, SCB, _, _ = bnb.functional.double_quant(weight)
         delattr(self, "weight")
@@ -89,15 +89,17 @@ class Linear8bitTP(nn.Linear):
         return out
 
 class LinearTP(nn.Module):
+
     __constants__ = ['in_features', 'out_features']
     in_features: int
     out_features: int
     weight: Tensor
     
-    def __init__(self, in_features:int, out_features:int, bias:bool=False,
-                 weight_data=None, bias_data=None, device="meta", dtype=None,
-                 use_int8:bool=True
-                 ) -> None:
+    def __init__(
+        self, in_features: int, out_features: int, bias: bool = False,
+        weight_data=None, bias_data=None, device="meta", dtype=None,
+        use_int8: bool = True,
+    ) -> None:
         factory_kwargs = {'device': device, 'dtype': dtype}
         super(LinearTP, self).__init__()
         self.rank = dist.get_rank()
@@ -114,7 +116,7 @@ class LinearTP(nn.Module):
             self.bias = bias_data
         
     def forward(self, x):
-        if self.use_int8 == True:
+        if self.use_int8:
             x = x.chunk(self.world_size, dim=2)[self.rank]
             out = F.linear(x, self.weight, self.bias)
             dist.all_reduce(out, op=ReduceOp.SUM)
@@ -126,7 +128,9 @@ class LinearTP(nn.Module):
             del tensor_list
         return out
 
+
 class EmbeddingTP(nn.Embedding):
+
     def __init__(
         self,
         num_embeddings: int,

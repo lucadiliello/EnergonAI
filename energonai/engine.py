@@ -4,6 +4,7 @@ import time
 from collections import deque
 from threading import Lock, Thread
 from typing import Any, Callable, Deque, Dict, Hashable, List, Optional, Tuple
+import torch
 
 import torch.distributed.rpc as trpc
 import torch.nn as nn
@@ -98,7 +99,7 @@ class AsyncEngine:
                 for uid, output in self.batch_manager.split_batch(task_entries[0], **batch_info):
                     self.completion_map[uid] = output
                 batch_size, start_time = self.timer_info.pop(task_entries[0].uids)
-                self.logger.info(f'batch size: {batch_size}, time: {time.time() -start_time:.3f}')
+                self.logger.info(f'batch size: {batch_size}, time: {time.time() - start_time:.3f}')
             else:
                 time.sleep(0.1)
 

@@ -34,6 +34,7 @@ class GenerationTaskReq(BaseModel):
     num_beams: Optional[int] = Field(default=1, ge=1, le=16)
     num_return_sequences: Optional[int] = Field(default=1, ge=1, le=16)
     num_beam_groups: Optional[int] = Field(default=1, ge=1, le=16)
+    early_stopping: Optional[bool] = Field(default=False)
 
 
 app = FastAPI()
@@ -68,7 +69,6 @@ async def set(data: SetTaskReq, request: Request):
     logger.info(
         f'Setting {request.client.host}:{request.client.port} - "{request.method} {request.url.path}" - {data}'
     )
-
     try:
         if data.max_batch_size is not None:
             batch_manager.max_batch_size = data.max_batch_size
@@ -95,6 +95,7 @@ def print_args(args: argparse.Namespace):
 
 
 class WrapCallModule(torch.nn.Module):
+
     def __init__(self, model: torch.nn.Module):
         super(WrapCallModule, self).__init__()
         self.model = model

@@ -94,7 +94,8 @@ class Worker:
             outputs = self.model(**inputs)
         else:
             outputs = self.model(inputs)
-        return outputs
+        torch.cuda.empty_cache()
+        return outputs.to(torch.device('cpu'))
 
 
 def launch_workers(tp_world_size: int, pp_world_size: int, master_host: str, master_port: int, rpc_port: int,
